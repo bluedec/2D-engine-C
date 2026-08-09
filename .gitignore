@@ -1,0 +1,12 @@
+# direnv
+.direnv/
+
+# Build artifacts
+build/
+
+# Caches
+.cache/
+
+# Environment variables / local environment
+.env
+.env.*
