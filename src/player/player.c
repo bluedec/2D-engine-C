@@ -99,14 +99,12 @@ void player_handle_logic(Player *player, Stage *stage, const double delta, GameC
   if (should_move_left) {
     player->hitbox.x += hor_vel * delta;
     if (x - gamecam->x < CAMERA_DISTANCE_TO_DRAG) {
-      SDL_Log("x - gamecam->x: %f", x - gamecam->x);
       gamecam->x += hor_vel * delta;
     }
   }
   if (should_move_right) {
     player->hitbox.x += hor_vel * delta;
     if ((gamecam->x + gamecam->windowSettings->w) - (x + player->hitbox.w) < CAMERA_DISTANCE_TO_DRAG) {
-      SDL_Log("gamecam->x + gamecam->windowSettings->w) - x: %f", (gamecam->x + gamecam->windowSettings->w) - x);
       gamecam->x += hor_vel * delta;
     }
   }
@@ -169,23 +167,18 @@ void player_handle_collisions(Player *player, SDL_FRect *objects, int n_objects,
     SDL_FRect obj = objects[i];
 
     bool intersects = SDL_GetRectIntersectionFloat(&player->hitbox, &obj, &intersection);
-    CollisionDirection coll_dir = 0;
+    CollisionDirection coll_dir = COLL_BOTTOM;
 
     if (intersects) {
       if ((y + player->hitbox.h) < intersection.y + 1) {
         coll_dir = COLL_BOTTOM; // The bottom has prio.
-      } else {
-        if (y > (intersection.y) - 1) {
-          coll_dir = COLL_TOP;
-        }      
-        if ((x + player->hitbox.w) <= intersection.x + 1) {
-          coll_dir = COLL_RIGHT;
-        }   
-        if (x > (obj.x + obj.w) - 1) {
-          coll_dir = COLL_LEFT;
-        }                        
+      } else if ((x + player->hitbox.w) <= intersection.x + 1) {
+        coll_dir = COLL_RIGHT;
+      } else if (x > (obj.x + obj.w) - 1) {
+        coll_dir = COLL_LEFT;
+      } else if (y > (intersection.y) - 1) {
+        coll_dir = COLL_TOP;
       }
-
       // We can only collide from one side with each object
       switch (coll_dir) {
         case COLL_BOTTOM:

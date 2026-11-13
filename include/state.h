@@ -3,6 +3,7 @@
 
 
 #include "stage.h"
+
 typedef enum {
   STATE_MENU,
   STATE_GAME,
@@ -11,7 +12,7 @@ typedef enum {
 
 typedef struct {
   Stage *stages;
-  Stage *currentStage;
+  int currentStage;
   double delta;
   const bool *key_states;
 } GlobalState;

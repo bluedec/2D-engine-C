@@ -35,7 +35,7 @@ void app_init(App *app, GlobalState *globalState) {
     .id = BLUE_FOREST,
     .name = STAGE_2_NAME,
   };
-  globalState->currentStage = &globalState->stages[0];
+  globalState->currentStage = 1;
 
   if (!window) {
     SDL_Log("SDL_CreateWindow failed: %s\n", SDL_GetError());
@@ -74,31 +74,47 @@ void app_loop(App *app, GlobalState *globalState) {
     .is_jumping = false,
   };
 
-  globalState->currentStage->camera = (GameCamera) { 
-    .x = 0,
-    .y = 0,
-  };
-
   SDL_Renderer *r = app->renderer;
   SDL_Window *w = app->window;
 
-  SDL_FRect *entities = malloc(sizeof(*entities) * 5);
+  SDL_FRect *entities = malloc(sizeof(*entities) * 500);
   if (entities == NULL) {
     SDL_Log("Failed to allocate entities");
   }
-  Stage currentStage = { 
-    .id = 1,
+  Platform *platforms = malloc(sizeof(*platforms) * 50);
+  if (platforms == NULL) {
+    SDL_Log("Failed to allocate platforms");
+  }
+  Stage greenForestStageData = {
+    .id = GREEN_FOREST,
     .name = STAGE_1_NAME,
     .player = &player,
     .renderer = r,
     .entities = entities,
+    .platforms = platforms,
     .n_entities = 2,
+    .n_platforms = 0,
     .transitionScreen = 0.0,
     .camera = { 0, 0, &app->windowSettings },
-    
   };
+  Stage blueForestStageData = {
+    .id = BLUE_FOREST,
+    .name = STAGE_1_NAME,
+    .player = &player,
+    .renderer = r,
+    .entities = entities,
+    .platforms = platforms,
+    .n_entities = 2,
+    .n_platforms = 0,
+    .transitionScreen = 0.0,
+    .camera = { 0, 0, &app->windowSettings },
+  };
+  Stage stages[2];
+  stages[0] = greenForestStageData;
+  stages[1] = blueForestStageData;
 
-  globalState->currentStage = &currentStage;
+  globalState->stages = stages;
+  globalState->currentStage = 1;
 
   struct timespec current_time, last_time;
   timespec_get(&last_time, TIME_UTC);
@@ -120,8 +136,8 @@ void app_loop(App *app, GlobalState *globalState) {
           running = false;
         }
         if (event.key.key == SDLK_R) {
-          globalState->currentStage->camera.x = 0;
-          globalState->currentStage->camera.y = 0;
+          globalState->stages[globalState->currentStage].camera.x = 0;
+          globalState->stages[globalState->currentStage].camera.y = 0;
           player.hitbox.x = (float) app->windowSettings.w / 2;
           player.hitbox.y = (float) app->windowSettings.h / 2;
           player.ver_velocity = 0;
@@ -144,7 +160,7 @@ void app_loop(App *app, GlobalState *globalState) {
         //}
         break;
       case STATE_GAME:
-        switch (globalState->currentStage->id) {
+        switch (globalState->currentStage) {
           case GREEN_FOREST: 
             greenForest(globalState);
             break;
@@ -162,7 +178,7 @@ void app_loop(App *app, GlobalState *globalState) {
 }
 
 void app_cleanup(App *app, GlobalState *globalState) {
-  free(globalState->currentStage->entities);
+  free(globalState->stages[globalState->currentStage].entities);
   free(globalState->stages);
   SDL_DestroyRenderer(app->renderer);
   SDL_DestroyWindow(app->window);

@@ -4,14 +4,12 @@
 #include "SDL3/SDL_render.h"
 #include "player.h"
 
-void stage_render_world_objects(Stage *stage) {
+void stage_render_entities(Stage *stage) {
   int i, x, y;
+  int n = stage->n_entities;
   SDL_Renderer *r = stage->renderer;
   SDL_FRect *entity = stage->entities;
   Coordinates camcords = { stage->camera.x, stage->camera.y };
-  int n = stage->n_entities;
-
-
   SDL_FRect player_hitbox = stage->player->hitbox;
   Color pcolor = stage->player->color;
 
@@ -27,8 +25,7 @@ void stage_render_world_objects(Stage *stage) {
   // Render entities
   for (i = 0; i < n; i++) {
     SDL_SetRenderDrawColor(r, 0x00, 0xFF, 0x00, 255);
-
-    SDL_FRect temp = { 
+    SDL_FRect temp = {
       .x = entity->x - camcords.x,
       .y = entity->y - camcords.y,
       .w = entity->w,
@@ -38,4 +35,14 @@ void stage_render_world_objects(Stage *stage) {
     entity++;
   }
 
+}
+
+void stage_render_platforms(Stage *stage) {
+  // TODO
+}
+
+bool stage_add_platform(Stage *stage, Platform *platform) {
+  stage->platforms[stage->n_platforms] = *platform;
+  stage->n_platforms += 1;
+  return true;
 }
